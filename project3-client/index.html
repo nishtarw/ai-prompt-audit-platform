@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Prompt Audit Platform</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>AI Prompt Audit Platform</h1>
+      <p class="subtitle">
+        A simple client for managing users, prompts, AI models, and execution history.
+      </p>
+    </header>
+
+    <section class="card connection-card">
+      <h2>Connection Settings</h2>
+      <div class="row">
+        <label for="baseUrl">API Address</label>
+        <input id="baseUrl" value="http://127.0.0.1:8000" size="30" />
+        <button onclick="setBaseUrl()">Connect</button>
+      </div>
+      <div id="baseUrlStatus" class="muted"></div>
+      <p class="help-text">
+        Make sure your FastAPI server is running before using the client.
+      </p>
+    </section>
+
+    <div class="dashboard">
+
+      <!-- USERS -->
+      <section class="card">
+        <h2>Users</h2>
+        <p class="section-note">View, add, update, and remove user records.</p>
+
+        <div class="tool-group">
+          <h3>View Users</h3>
+
+          <div class="row">
+            <button onclick="users_getAll()">Show All Users</button>
+          </div>
+
+          <div class="row">
+            <input id="users_get_id" placeholder="User ID" size="8" />
+            <button onclick="users_getById()">Find User</button>
+          </div>
+
+          <div class="row">
+            <input id="users_search_name" placeholder="Name contains..." size="18" />
+            <button onclick="users_search()">Search</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Add User</h3>
+          <div class="row">
+            <input id="users_new_name" placeholder="Full name" size="14" />
+            <input id="users_new_email" placeholder="Email address" size="18" />
+            <button onclick="users_create()">Add User</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Update User</h3>
+          <div class="row">
+            <input id="users_upd_id" placeholder="User ID" size="8" />
+            <input id="users_upd_name" placeholder="New name" size="14" />
+            <input id="users_upd_email" placeholder="New email" size="18" />
+            <button onclick="users_update()">Update User</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Delete User</h3>
+          <div class="row">
+            <input id="users_del_id" placeholder="User ID" size="8" />
+            <button class="danger" onclick="users_delete()">Delete User</button>
+          </div>
+        </div>
+
+        <div id="users_status" class="status-line muted"></div>
+
+        <table id="users_table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Name</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- PROMPTS -->
+      <section class="card">
+        <h2>Prompts</h2>
+        <p class="section-note">Manage saved prompts and view them by user.</p>
+
+        <div class="tool-group">
+          <h3>View Prompts</h3>
+
+          <div class="row">
+            <button onclick="prompts_getAll()">Show All Prompts</button>
+          </div>
+
+          <div class="row">
+            <input id="prompts_get_id" placeholder="Prompt ID" size="8" />
+            <button onclick="prompts_getById()">Find Prompt</button>
+          </div>
+
+          <div class="row">
+            <input id="prompts_subset_user" placeholder="User ID" size="8" />
+            <button onclick="prompts_byUser()">View by User</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Add Prompt</h3>
+          <div class="row">
+            <input id="prompts_new_text" placeholder="Prompt text" size="20" />
+            <input id="prompts_new_version" placeholder="Version" size="8" />
+            <input id="prompts_new_userid" placeholder="User ID" size="8" />
+            <button onclick="prompts_create()">Add Prompt</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Update Prompt</h3>
+          <div class="row">
+            <input id="prompts_upd_id" placeholder="Prompt ID" size="8" />
+            <input id="prompts_upd_text" placeholder="Updated text" size="24" />
+            <button onclick="prompts_update()">Update Prompt</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Delete Prompt</h3>
+          <div class="row">
+            <input id="prompts_del_id" placeholder="Prompt ID" size="8" />
+            <button class="danger" onclick="prompts_delete()">Delete Prompt</button>
+          </div>
+        </div>
+
+        <div id="prompts_status" class="status-line muted"></div>
+
+        <table id="prompts_table">
+          <thead>
+            <tr>
+              <th>Prompt ID</th>
+              <th>Prompt Text</th>
+              <th>Version</th>
+              <th>User ID</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- MODELS -->
+      <section class="card">
+        <h2>AI Models</h2>
+        <p class="section-note">View and manage available AI model records.</p>
+
+        <div class="tool-group">
+          <h3>View Models</h3>
+
+          <div class="row">
+            <button onclick="models_getAll()">Show All Models</button>
+          </div>
+
+          <div class="row">
+            <input id="models_get_id" placeholder="Model ID" size="8" />
+            <button onclick="models_getById()">Find Model</button>
+          </div>
+
+          <div class="row">
+            <input id="models_subset_provider" placeholder="Provider contains..." size="18" />
+            <button onclick="models_search()">Search</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Add Model</h3>
+          <div class="row">
+            <input id="models_new_name" placeholder="Model name" size="16" />
+            <input id="models_new_provider" placeholder="Provider" size="14" />
+            <button onclick="models_create()">Add Model</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Update Model</h3>
+          <div class="row">
+            <input id="models_upd_id" placeholder="Model ID" size="8" />
+            <input id="models_upd_name" placeholder="New name" size="16" />
+            <input id="models_upd_provider" placeholder="New provider" size="14" />
+            <button onclick="models_update()">Update Model</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Delete Model</h3>
+          <div class="row">
+            <input id="models_del_id" placeholder="Model ID" size="8" />
+            <button class="danger" onclick="models_delete()">Delete Model</button>
+          </div>
+        </div>
+
+        <div id="models_status" class="status-line muted"></div>
+
+        <table id="models_table">
+          <thead>
+            <tr>
+              <th>Model ID</th>
+              <th>Model Name</th>
+              <th>Provider</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- EXECUTIONS -->
+      <section class="card">
+        <h2>Prompt Executions</h2>
+        <p class="section-note">Track executions and manage execution records.</p>
+
+        <div class="tool-group">
+          <h3>View Executions</h3>
+
+          <div class="row">
+            <button onclick="exec_getAll()">Show All Executions</button>
+          </div>
+
+          <div class="row">
+            <input id="exec_get_id" placeholder="Execution ID" size="10" />
+            <button onclick="exec_getById()">Find Execution</button>
+          </div>
+
+          <div class="row">
+            <input id="exec_subset_prompt" placeholder="Prompt ID" size="8" />
+            <button onclick="exec_byPrompt()">View by Prompt</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Add Execution</h3>
+          <div class="row">
+            <input id="exec_new_prompt" placeholder="Prompt ID" size="8" />
+            <input id="exec_new_model" placeholder="Model ID" size="8" />
+            <input id="exec_new_output" placeholder="Output text" size="18" />
+            <button onclick="exec_create()">Add Execution</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Update Execution</h3>
+          <div class="row">
+            <input id="exec_upd_id" placeholder="Execution ID" size="10" />
+            <input id="exec_upd_output" placeholder="Updated output" size="22" />
+            <button onclick="exec_update()">Update Execution</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <h3>Delete Execution</h3>
+          <div class="row">
+            <input id="exec_del_id" placeholder="Execution ID" size="10" />
+            <button class="danger" onclick="exec_delete()">Delete Execution</button>
+          </div>
+        </div>
+
+        <div id="exec_status" class="status-line muted"></div>
+
+        <table id="exec_table">
+          <thead>
+            <tr>
+              <th>Execution ID</th>
+              <th>Prompt ID</th>
+              <th>Model ID</th>
+              <th>Output Text</th>
+              <th>Executed At</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    let BASE_URL = document.getElementById('baseUrl').value;
+
+    function setBaseUrl() {
+      BASE_URL = document.getElementById('baseUrl').value.trim();
+      document.getElementById('baseUrlStatus').textContent = `Using: ${BASE_URL}`;
+    }
+    setBaseUrl();
+
+    function byId(id){ return document.getElementById(id).value.trim(); }
+    function must(id){
+      const v = byId(id);
+      if(!v) throw new Error(`Missing: ${id}`);
+      return v;
+    }
+
+    function qs(paramsObj){
+      const p = new URLSearchParams();
+      Object.entries(paramsObj).forEach(([k,v]) => p.append(k, v));
+      return p.toString();
+    }
+
+    async function api(path, options = {}) {
+      const url = BASE_URL + path;
+      try {
+        const res = await fetch(url, options);
+        const text = await res.text();
+        let payload;
+        try { payload = JSON.parse(text); } catch { payload = { raw: text }; }
+        return { res, payload };
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    function setStatus(elId, ok, msg){
+      const el = document.getElementById(elId);
+      el.innerHTML = `<span class="${ok ? 'ok' : 'bad'}">${ok ? 'Success:' : 'Error:'}</span> ${msg}`;
+    }
+
+    function renderTable(tableId, rows, cols){
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      tbody.innerHTML = '';
+      if(!rows || rows.length === 0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = cols.length;
+        td.textContent = 'No records found.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        cols.forEach((_, idx) => {
+          const td = document.createElement('td');
+          td.textContent = r[idx];
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // ---------------- USERS ----------------
+    async function users_getAll(){
+      const {res, payload} = await api('/users');
+      setStatus('users_status', res.ok, `User list updated (${res.status})`);
+      if(res.ok) renderTable('users_table', payload, ['user_id','name','email']);
+    }
+    async function users_getById(){
+      const id = must('users_get_id');
+      const {res, payload} = await api(`/users/${id}`);
+      setStatus('users_status', res.ok, `User lookup completed (${res.status})`);
+      if(res.ok) renderTable('users_table', payload ? [payload] : [], ['user_id','name','email']);
+    }
+    async function users_search(){
+      const name = must('users_search_name');
+      const {res, payload} = await api(`/users/search?${qs({name})}`);
+      setStatus('users_status', res.ok, `User search completed (${res.status})`);
+      if(res.ok) renderTable('users_table', payload, ['user_id','name','email']);
+    }
+    async function users_create(){
+      const name = must('users_new_name');
+      const email = must('users_new_email');
+      const {res} = await api(`/users?${qs({name, email})}`, { method: 'POST' });
+      setStatus('users_status', res.ok, `User created (${res.status})`);
+      if(res.ok) await users_getAll();
+    }
+    async function users_update(){
+      const user_id = must('users_upd_id');
+      const name = must('users_upd_name');
+      const email = must('users_upd_email');
+      const {res} = await api(`/users/${user_id}?${qs({name, email})}`, { method: 'PUT' });
+      setStatus('users_status', res.ok, `User updated (${res.status})`);
+      if(res.ok) await users_getAll();
+    }
+    async function users_delete(){
+      const user_id = must('users_del_id');
+      const {res} = await api(`/users/${user_id}`, { method: 'DELETE' });
+      setStatus('users_status', res.ok, `User deleted (${res.status})`);
+      if(res.ok) await users_getAll();
+    }
+
+    // ---------------- PROMPTS ----------------
+    async function prompts_getAll(){
+      const {res, payload} = await api('/prompts');
+      setStatus('prompts_status', res.ok, `Prompt list updated (${res.status})`);
+      if(res.ok) renderTable('prompts_table', payload, ['prompt_id','prompt_text','version','user_id']);
+    }
+    async function prompts_getById(){
+      const prompt_id = must('prompts_get_id');
+      const {res, payload} = await api(`/prompts/${prompt_id}`);
+      setStatus('prompts_status', res.ok, `Prompt lookup completed (${res.status})`);
+      if(res.ok) renderTable('prompts_table', payload ? [payload] : [], ['prompt_id','prompt_text','version','user_id']);
+    }
+    async function prompts_byUser(){
+      const user_id = must('prompts_subset_user');
+      const {res, payload} = await api(`/prompts/by-user/${user_id}`);
+      setStatus('prompts_status', res.ok, `Prompt filter completed (${res.status})`);
+      if(res.ok) renderTable('prompts_table', payload, ['prompt_id','prompt_text','version','user_id']);
+    }
+    async function prompts_create(){
+      const text = must('prompts_new_text');
+      const version = must('prompts_new_version');
+      const user_id = must('prompts_new_userid');
+      const {res} = await api(`/prompts?${qs({text, version, user_id})}`, { method: 'POST' });
+      setStatus('prompts_status', res.ok, `Prompt created (${res.status})`);
+      if(res.ok) await prompts_getAll();
+    }
+    async function prompts_update(){
+      const prompt_id = must('prompts_upd_id');
+      const text = must('prompts_upd_text');
+      const {res} = await api(`/prompts/${prompt_id}?${qs({text})}`, { method: 'PUT' });
+      setStatus('prompts_status', res.ok, `Prompt updated (${res.status})`);
+      if(res.ok) await prompts_getAll();
+    }
+    async function prompts_delete(){
+      const prompt_id = must('prompts_del_id');
+      const {res} = await api(`/prompts/${prompt_id}`, { method: 'DELETE' });
+      setStatus('prompts_status', res.ok, `Prompt deleted (${res.status})`);
+      if(res.ok) await prompts_getAll();
+    }
+
+    // ---------------- MODELS ----------------
+    async function models_getAll(){
+      const {res, payload} = await api('/models');
+      setStatus('models_status', res.ok, `Model list updated (${res.status})`);
+      if(res.ok) renderTable('models_table', payload, ['model_id','model_name','provider']);
+    }
+    async function models_getById(){
+      const model_id = must('models_get_id');
+      const {res, payload} = await api(`/models/${model_id}`);
+      setStatus('models_status', res.ok, `Model lookup completed (${res.status})`);
+      if(res.ok) renderTable('models_table', payload ? [payload] : [], ['model_id','model_name','provider']);
+    }
+    async function models_search(){
+      const provider = must('models_subset_provider');
+      const {res, payload} = await api(`/models/search?${qs({provider})}`);
+      setStatus('models_status', res.ok, `Model search completed (${res.status})`);
+      if(res.ok) renderTable('models_table', payload, ['model_id','model_name','provider']);
+    }
+    async function models_create(){
+      const name = must('models_new_name');
+      const provider = must('models_new_provider');
+      const {res} = await api(`/models?${qs({name, provider})}`, { method: 'POST' });
+      setStatus('models_status', res.ok, `Model created (${res.status})`);
+      if(res.ok) await models_getAll();
+    }
+    async function models_update(){
+      const model_id = must('models_upd_id');
+      const name = must('models_upd_name');
+      const provider = must('models_upd_provider');
+      const {res} = await api(`/models/${model_id}?${qs({name, provider})}`, { method: 'PUT' });
+      setStatus('models_status', res.ok, `Model updated (${res.status})`);
+      if(res.ok) await models_getAll();
+    }
+    async function models_delete(){
+      const model_id = must('models_del_id');
+      const {res} = await api(`/models/${model_id}`, { method: 'DELETE' });
+      setStatus('models_status', res.ok, `Model deleted (${res.status})`);
+      if(res.ok) await models_getAll();
+    }
+
+    // ---------------- EXECUTIONS ----------------
+    async function exec_getAll(){
+      const {res, payload} = await api('/executions');
+      setStatus('exec_status', res.ok, `Execution list updated (${res.status})`);
+      if(res.ok) renderTable('exec_table', payload, ['execution_id','prompt_id','model_id','output_text','executed_at']);
+    }
+    async function exec_getById(){
+      const execution_id = must('exec_get_id');
+      const {res, payload} = await api(`/executions/${execution_id}`);
+      setStatus('exec_status', res.ok, `Execution lookup completed (${res.status})`);
+      if(res.ok) renderTable('exec_table', payload ? [payload] : [], ['execution_id','prompt_id','model_id','output_text','executed_at']);
+    }
+    async function exec_byPrompt(){
+      const prompt_id = must('exec_subset_prompt');
+      const {res, payload} = await api(`/executions/by-prompt/${prompt_id}`);
+      setStatus('exec_status', res.ok, `Execution filter completed (${res.status})`);
+      if(res.ok) renderTable('exec_table', payload, ['execution_id','prompt_id','model_id','output_text','executed_at']);
+    }
+    async function exec_create(){
+      const prompt_id = must('exec_new_prompt');
+      const model_id = must('exec_new_model');
+      const output = must('exec_new_output');
+      const {res} = await api(`/executions?${qs({prompt_id, model_id, output})}`, { method: 'POST' });
+      setStatus('exec_status', res.ok, `Execution created (${res.status})`);
+      if(res.ok) await exec_getAll();
+    }
+    async function exec_update(){
+      const execution_id = must('exec_upd_id');
+      const output = must('exec_upd_output');
+      const {res} = await api(`/executions/${execution_id}?${qs({output})}`, { method: 'PUT' });
+      setStatus('exec_status', res.ok, `Execution updated (${res.status})`);
+      if(res.ok) await exec_getAll();
+    }
+    async function exec_delete(){
+      const execution_id = must('exec_del_id');
+      const {res} = await api(`/executions/${execution_id}`, { method: 'DELETE' });
+      setStatus('exec_status', res.ok, `Execution deleted (${res.status})`);
+      if(res.ok) await exec_getAll();
+    }
+
+    users_getAll();
+    prompts_getAll();
+    models_getAll();
+    exec_getAll();
+  </script>
+</body>
+</html>

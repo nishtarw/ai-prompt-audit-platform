@@ -1,57 +1,20 @@
+import os
 import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # -----------------------
 # DATABASE CONNECTION
 # -----------------------
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        database="ai_prompt_audit",
-        user="postgres",
-        password="Nishtarw2005!"
+        host=os.getenv("DB_HOST", "localhost"),
+        database=os.getenv("DB_NAME", "ai_prompt_audit"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD", ""),
+        port=int(os.getenv("DB_PORT", "5432"))
     )
-
-# -----------------------
-# PROMPTS TABLE
-# -----------------------
-def get_all_prompts():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM prompts ORDER BY prompt_id;")
-    results = cur.fetchall()
-    cur.close()
-    conn.close()
-    return results
-
-def insert_prompt(prompt_text, version, user_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO prompts (prompt_text, version, user_id) VALUES (%s, %s, %s)",
-        (prompt_text, version, user_id)
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def update_prompt(prompt_id, new_text):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "UPDATE prompts SET prompt_text = %s WHERE prompt_id = %s",
-        (new_text, prompt_id)
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def delete_prompt(prompt_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM prompts WHERE prompt_id = %s", (prompt_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
 
 # -----------------------
 # USERS TABLE
@@ -60,10 +23,31 @@ def get_all_users():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM users ORDER BY user_id;")
-    results = cur.fetchall()
+    rows = cur.fetchall()
     cur.close()
     conn.close()
-    return results
+    return rows
+
+def get_user_by_id(user_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE user_id = %s;", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
+
+def get_users_by_name(name_substring: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM users WHERE name ILIKE %s ORDER BY user_id;",
+        (f"%{name_substring}%",)
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
 
 def insert_user(name, email):
     conn = get_connection()
@@ -96,16 +80,100 @@ def delete_user(user_id):
     conn.close()
 
 # -----------------------
+# PROMPTS TABLE
+# -----------------------
+def get_all_prompts():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM prompts ORDER BY prompt_id;")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+def get_prompt_by_id(prompt_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM prompts WHERE prompt_id = %s;", (prompt_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
+
+def get_prompts_by_user(user_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM prompts WHERE user_id = %s ORDER BY prompt_id;",
+        (user_id,)
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+def insert_prompt(prompt_text, version, user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO prompts (prompt_text, version, user_id) VALUES (%s, %s, %s)",
+        (prompt_text, version, user_id)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def update_prompt(prompt_id, new_text):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE prompts SET prompt_text = %s WHERE prompt_id = %s",
+        (new_text, prompt_id)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def delete_prompt(prompt_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM prompts WHERE prompt_id = %s", (prompt_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# -----------------------
 # AI_MODELS TABLE
 # -----------------------
 def get_all_ai_models():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM ai_models ORDER BY model_id;")
-    results = cur.fetchall()
+    rows = cur.fetchall()
     cur.close()
     conn.close()
-    return results
+    return rows
+
+def get_ai_model_by_id(model_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM ai_models WHERE model_id = %s;", (model_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
+
+def get_models_by_provider(provider_substring: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM ai_models WHERE provider ILIKE %s ORDER BY model_id;",
+        (f"%{provider_substring}%",)
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
 
 def insert_ai_model(model_name, provider):
     conn = get_connection()
@@ -144,10 +212,31 @@ def get_all_prompt_executions():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM prompt_executions ORDER BY execution_id;")
-    results = cur.fetchall()
+    rows = cur.fetchall()
     cur.close()
     conn.close()
-    return results
+    return rows
+
+def get_execution_by_id(execution_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM prompt_executions WHERE execution_id = %s;", (execution_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
+
+def get_executions_by_prompt(prompt_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM prompt_executions WHERE prompt_id = %s ORDER BY execution_id;",
+        (prompt_id,)
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
 
 def insert_prompt_execution(prompt_id, model_id, output_text):
     conn = get_connection()
